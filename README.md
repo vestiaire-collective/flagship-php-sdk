@@ -30,3 +30,5 @@ composer require wcomnisky/flagship-php-sdk
 * [Run all Campaigns assignment](http://developers.flagship.io/api/v1/#run-all-campaigns-assignment)
 * [Run a single Campaign assignment](http://developers.flagship.io/api/v1/#run-a-single-campaign-assignment)
 * [Campaign Activation](http://developers.flagship.io/api/v1/?shell#campaign-activation)
+
+> NOTE: all requests are currently using `POST` request only.
