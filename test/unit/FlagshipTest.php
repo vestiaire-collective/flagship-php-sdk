@@ -14,13 +14,14 @@ use Wcomnisky\Flagship\Flagship;
 class FlagshipTest extends TestCase
 {
     private const ENV_ID = 'cj12clb73ggr1p9ie64h';
+    private const BASE_URL = 'https://fake-url-cj12clb73ggr1p9ie64h';
 
     /**
      * @covers Wcomnisky\Flagship\Flagship::__construct
      */
     public function test_successful_new_instance()
     {
-        $flagship = new Flagship(self::ENV_ID, $this->createMock(HttpClientInterface::class));
+        $flagship = new Flagship(self::BASE_URL, self::ENV_ID, $this->createMock(HttpClientInterface::class));
         $this->assertInstanceOf(Flagship::class, $flagship);
     }
 
@@ -30,7 +31,16 @@ class FlagshipTest extends TestCase
     public function test_new_instance_with_empty_environmentId_should_throw_exception()
     {
         $this->expectException(\InvalidArgumentException::class);
-        new Flagship('', $this->createMock(HttpClientInterface::class));
+        new Flagship(self::BASE_URL, '', $this->createMock(HttpClientInterface::class));
+    }
+
+    /**
+     * @covers Wcomnisky\Flagship\Flagship::__construct
+     */
+    public function test_new_instance_with_empty_base_url_should_throw_exception()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new Flagship('', '', $this->createMock(HttpClientInterface::class));
     }
 
     /**
@@ -57,7 +67,7 @@ class FlagshipTest extends TestCase
             ->method('request')
              ->with(
                  $this->identicalTo('POST'),
-                 $this->identicalTo("https://decision-api.flagship.io/v1/{$environmentId}/campaigns/{$campaignId}"),
+                 $this->identicalTo(sprintf('%s/%s/campaigns/%s', self::BASE_URL, $environmentId, $campaignId)),
                  $this->callback(function ($options) use ($visitorId) {
                     $expectedOptions = [
                         'json' => [
@@ -73,7 +83,7 @@ class FlagshipTest extends TestCase
                  })
              )->willReturn($response);
 
-        $flagship = new Flagship($environmentId, $httpClient);
+        $flagship = new Flagship(self::BASE_URL, $environmentId, $httpClient);
         $returnedResponse = $flagship->requestSingleCampaign($visitorId, $campaignId, $context);
         $this->assertSame($response, $returnedResponse);
     }
@@ -101,7 +111,7 @@ class FlagshipTest extends TestCase
             ->method('request')
             ->with(
                 $this->identicalTo('POST'),
-                $this->identicalTo("https://decision-api.flagship.io/v1/{$environmentId}/campaigns"),
+                $this->identicalTo(sprintf('%s/%s/campaigns', self::BASE_URL, $environmentId)),
                 $this->callback(function ($options) use ($visitorId) {
                     $expectedOptions = [
                         'json' => [
@@ -116,7 +126,7 @@ class FlagshipTest extends TestCase
                 })
             )->willReturn($response);
 
-        $flagship = new Flagship($environmentId, $httpClient);
+        $flagship = new Flagship(self::BASE_URL, $environmentId, $httpClient);
         $returnedResponse = $flagship->requestAllCampaigns($visitorId, $context);
         $this->assertSame($response, $returnedResponse);
     }
@@ -146,7 +156,7 @@ class FlagshipTest extends TestCase
             ->method('request')
             ->with(
                 $this->identicalTo('POST'),
-                $this->identicalTo("https://decision-api.flagship.io/v1/{$environmentId}/campaigns?mode=simple"),
+                $this->identicalTo(sprintf('%s/%s/campaigns?mode=simple', self::BASE_URL, $environmentId)),
                 $this->callback(function ($options) use ($visitorId) {
                     $expectedOptions = [
                         'json' => [
@@ -169,7 +179,7 @@ class FlagshipTest extends TestCase
             ->method('isTriggerHitEnabled')
             ->willReturn(true);
 
-        $flagship = new Flagship($environmentId, $httpClient);
+        $flagship = new Flagship(self::BASE_URL, $environmentId, $httpClient);
         $flagship->setRequestParameters($requestParameters);
         $returnedResponse = $flagship->requestAllCampaigns($visitorId, $context);
         $this->assertSame($response, $returnedResponse);
@@ -178,6 +188,8 @@ class FlagshipTest extends TestCase
     /**
      * @covers \Wcomnisky\Flagship\Flagship::requestCampaignActivation
      * @covers \Wcomnisky\Flagship\Flagship::__construct
+     * @covers \Wcomnisky\Flagship\Flagship::getCompaignActivationUrl
+     * @covers \Wcomnisky\Flagship\Flagship::replaceNamedParameter
      */
     public function test_successful_requestCampaignActivation()
     {
@@ -193,7 +205,7 @@ class FlagshipTest extends TestCase
             ->method('request')
             ->with(
                 $this->identicalTo('POST'),
-                $this->identicalTo('https://decision-api.flagship.io/v1/activate'),
+                $this->identicalTo(sprintf('%s/activate', self::BASE_URL)),
                 $this->callback(function ($options) use ($environmentId, $visitorId, $variationGroupId, $variationId) {
                     $expectedOptions = [
                         'json' => [
@@ -208,7 +220,7 @@ class FlagshipTest extends TestCase
                 })
             )->willReturn($response);
 
-        $flagship = new Flagship($environmentId, $httpClient);
+        $flagship = new Flagship(self::BASE_URL, $environmentId, $httpClient);
         $returnedResponse = $flagship->requestCampaignActivation($visitorId, $variationGroupId, $variationId);
         $this->assertSame($response, $returnedResponse);
     }

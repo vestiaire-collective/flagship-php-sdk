@@ -19,11 +19,16 @@ class Flagship
 {
     private const NAMED_PARAM_ENV_ID = '%ENVIRONMENT_ID';
     private const NAMED_PARAM_CAMPAIGN_ID = '%CAMPAIGN_ID';
+    private const NAMED_PARAM_BASE_URL = '%BASE_URL';
 
-    private const URL_BASE = 'https://decision-api.flagship.io/v1';
-    private const URL_ALL_CAMPAIGNS = self::URL_BASE . '/' . self::NAMED_PARAM_ENV_ID . '/campaigns';
+    private const URL_ALL_CAMPAIGNS = self::NAMED_PARAM_BASE_URL . '/' . self::NAMED_PARAM_ENV_ID . '/campaigns';
     private const URL_SINGLE_CAMPAIGN = self::URL_ALL_CAMPAIGNS . '/' . self::NAMED_PARAM_CAMPAIGN_ID;
-    private const URL_CAMPAIGN_ACTIVATION = self::URL_BASE . '/activate';
+    private const URL_CAMPAIGN_ACTIVATION = self::NAMED_PARAM_BASE_URL . '/activate';
+
+    /**
+     * @var string the base url of flagship endpoints ex: https://decision-api.flagship.io/v1
+     */
+    private $baseUrl;
 
     /**
      * @var RequestParameters
@@ -42,17 +47,23 @@ class Flagship
     private $httpClient;
 
     /**
-     * Flagship constructor
+     * Flagship constructor.
      *
-     * @param string $environmentId Flagship Environment ID
+     * @param string              $baseUrl
+     * @param string              $environmentId
      * @param HttpClientInterface $httpClient
      */
-    public function __construct(string $environmentId, HttpClientInterface $httpClient)
+    public function __construct(string $baseUrl, string $environmentId, HttpClientInterface $httpClient)
     {
+        if (empty($baseUrl)) {
+            throw new \InvalidArgumentException('baseUrl cannot be empty');
+        }
+
         if (empty($environmentId)) {
             throw new \InvalidArgumentException('Environment ID cannot be empty');
         }
 
+        $this->baseUrl = $baseUrl;
         $this->environmentId = $environmentId;
         $this->httpClient = $httpClient;
         $this->requestParameters = new RequestParameters();
@@ -98,7 +109,7 @@ class Flagship
 
         $response = $this->httpClient->request(
             'POST',
-            self::URL_CAMPAIGN_ACTIVATION,
+            $this->getCompaignActivationUrl(),
             [
                 'json' => $jsonArray
             ]
@@ -199,8 +210,22 @@ class Flagship
         return $this->replaceNamedParameter(
             self::URL_SINGLE_CAMPAIGN,
             [
+                self::NAMED_PARAM_BASE_URL => $this->baseUrl,
                 self::NAMED_PARAM_ENV_ID => $this->environmentId,
                 self::NAMED_PARAM_CAMPAIGN_ID => $campaignId
+            ]
+        );
+    }
+
+    /**
+     * @return string
+     */
+    private function getCompaignActivationUrl(): string
+    {
+        return $this->replaceNamedParameter(
+            self::URL_CAMPAIGN_ACTIVATION,
+            [
+                self::NAMED_PARAM_BASE_URL => $this->baseUrl
             ]
         );
     }
@@ -216,6 +241,7 @@ class Flagship
         $url = $this->replaceNamedParameter(
             self::URL_ALL_CAMPAIGNS,
             [
+                self::NAMED_PARAM_BASE_URL => $this->baseUrl,
                 self::NAMED_PARAM_ENV_ID => $this->environmentId
             ]
         );
