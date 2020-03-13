@@ -7,6 +7,10 @@
         {
             "name": "William Comnisky",
             "email": "w.comnisky@gmail.com"
+        },
+        {
+            "name": "Taha Id Boubker",
+            "email": "tidboubker@gmail.com"
         }
     ],
     "require": {
@@ -31,10 +35,5 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
-        }
     }
 }
