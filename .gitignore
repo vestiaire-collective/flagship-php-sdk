@@ -1,5 +1,8 @@
+.buildpath
 .DS_Store
 .idea/
 .phpcs.cache
+.project
+.settings/
 clover.xml
 vendor/
