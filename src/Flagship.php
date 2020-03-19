@@ -139,7 +139,7 @@ class Flagship
 
         $jsonArray = [
             'visitor_id' => $visitorId,
-            'context' => $context->getList(),
+            'context' => !empty($context->getList()) ? $context->getList() : new \stdClass(),
             'decision_group' => $this->requestParameters->getDecisionGroup(),
             'format_response' => $this->requestParameters->isFormatResponseEnabled(),
             'trigger_hit' => $this->requestParameters->isTriggerHitEnabled()
@@ -171,7 +171,7 @@ class Flagship
     {
         $jsonArray = [
             'visitor_id' => $visitorId,
-            'context' => $context->getList(),
+            'context' => !empty($context->getList()) ? $context->getList() : new \stdClass(),
             'decision_group' => $this->requestParameters->getDecisionGroup(),
             'trigger_hit' => $this->requestParameters->isTriggerHitEnabled()
         ];

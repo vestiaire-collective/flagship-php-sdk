@@ -69,17 +69,22 @@ class FlagshipTest extends TestCase
                  $this->identicalTo('POST'),
                  $this->identicalTo(sprintf('%s/%s/campaigns/%s', self::BASE_URL, $environmentId, $campaignId)),
                  $this->callback(function ($options) use ($visitorId) {
-                    $expectedOptions = [
-                        'json' => [
-                            'visitor_id' => $visitorId,
-                            'context' => [],
-                            'decision_group' => null,
-                            'format_response' => false,
-                            'trigger_hit' => true
-                        ]
-                    ];
+                     $this->assertArrayHasKey('context', $options['json']);
+                     $this->assertInstanceOf(\stdClass::class, $options['json']['context']);
+                     unset($options['json']['context']);
 
-                    return $options === $expectedOptions;
+                     $expectedOptions = [
+                         'json' => [
+                             'visitor_id' => $visitorId,
+                             'decision_group' => null,
+                             'format_response' => false,
+                             'trigger_hit' => true
+                         ]
+                     ];
+
+                     $this->assertEquals($options, $expectedOptions);
+
+                     return true;
                  })
              )->willReturn($response);
 
@@ -113,16 +118,21 @@ class FlagshipTest extends TestCase
                 $this->identicalTo('POST'),
                 $this->identicalTo(sprintf('%s/%s/campaigns', self::BASE_URL, $environmentId)),
                 $this->callback(function ($options) use ($visitorId) {
+                    $this->assertArrayHasKey('context', $options['json']);
+                    $this->assertInstanceOf(\stdClass::class, $options['json']['context']);
+                    unset($options['json']['context']);
+
                     $expectedOptions = [
                         'json' => [
                             'visitor_id' => $visitorId,
-                            'context' => [],
                             'decision_group' => null,
                             'trigger_hit' => true
                         ]
                     ];
 
-                    return $options === $expectedOptions;
+                    $this->assertEquals($options, $expectedOptions);
+
+                    return true;
                 })
             )->willReturn($response);
 
@@ -158,16 +168,21 @@ class FlagshipTest extends TestCase
                 $this->identicalTo('POST'),
                 $this->identicalTo(sprintf('%s/%s/campaigns?mode=simple', self::BASE_URL, $environmentId)),
                 $this->callback(function ($options) use ($visitorId) {
+                    $this->assertArrayHasKey('context', $options['json']);
+                    $this->assertInstanceOf(\stdClass::class, $options['json']['context']);
+                    unset($options['json']['context']);
+
                     $expectedOptions = [
                         'json' => [
                             'visitor_id' => $visitorId,
-                            'context' => [],
                             'decision_group' => null,
                             'trigger_hit' => true
                         ]
                     ];
 
-                    return $options === $expectedOptions;
+                    $this->assertEquals($options, $expectedOptions);
+
+                    return true;
                 })
             )->willReturn($response);
 
